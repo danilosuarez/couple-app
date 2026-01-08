@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  passwordHash  String?   // For admin-created users (null for OAuth users)
+  image         String?
+  isActive      Boolean   @default(true) // Soft delete / deactivation
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  memberships   GroupMember[]
+  transactions  Transaction[] @relation("Payer")
+  splits        Split[]
+  accounts      FinancialAccount[]
+  comments      Comment[]
+}
+
+model Group {
+  id            String    @id @default(cuid())
+  name          String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  members       GroupMember[]
+  transactions  Transaction[]
+  categories    Category[]
+  goals         Goal[]
+  recurringTemplates RecurringTemplate[]
+  alerts        Alert[]
+  auditLogs     AuditLog[]
+}
+
+enum GroupRole {
+  OWNER   // Can manage members, full access
+  ADMIN   // Can add/remove members (future)
+  MEMBER  // Standard access
+}
+
+model GroupMember {
+  id        String    @id @default(cuid())
+  userId    String
+  groupId   String
+  role      GroupRole @default(MEMBER)
+  joinedAt  DateTime  @default(now())
+  
+  user      User      @relation(fields: [userId], references: [id])
+  group     Group     @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String?  
+  groupId   String?  
+  group     Group?   @relation(fields: [groupId], references: [id])
+  
+  transactions Transaction[]
+  templates    RecurringTemplate[]
+}
+
+enum PrivacyLevel {
+  SHARED
+  PERSONAL
+  PRIVATE
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CREDIT_CARD
+  INVESTMENT
+  LOAN
+  CASH
+  OTHER
+}
+
+model FinancialAccount {
+  id            String       @id @default(cuid())
+  name          String
+  type          AccountType
+  balance       Int          @default(0) // Stored in cents
+  currency      String       @default("COP")
+  
+  privacyLevel  PrivacyLevel @default(PERSONAL)
+  
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  
+  transactions  Transaction[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Comment {
+  id            String      @id @default(cuid())
+  content       String
+  
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+  SAVING
+  TRANSFER
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  COMPLETED 
+  PENDING   
+  DRAFT     
+}
+
+model Transaction {
+  id            String    @id @default(cuid())
+  groupId       String
+  group         Group     @relation(fields: [groupId], references: [id])
+  
+  payerId       String
+  payer         User      @relation("Payer", fields: [payerId], references: [id])
+  
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  
+  amount        Int       
+  description   String
+  date          DateTime
+  type          TransactionType
+  status        TransactionStatus @default(COMPLETED)
+  
+  splits        Split[]
+  comments      Comment[]
+
+  accountId     String?
+  account       FinancialAccount? @relation(fields: [accountId], references: [id])
+
+  goalId        String?
+  goal          Goal?     @relation(fields: [goalId], references: [id])
+  
+  templateId    String?
+  template      RecurringTemplate? @relation(fields: [templateId], references: [id])
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String    
+}
+
+model Split {
+  id            String    @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  amount        Int       
+  percentage    Int?      
+}
+
+model RecurringTemplate {
+  id            String    @id @default(cuid())
+  groupId       String
+  group         Group     @relation(fields: [groupId], references: [id])
+  
+  name          String    
+  amount        Int?      
+  description   String?
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  payerId       String
+  
+  frequency     String    
+  dayOfMonth    Int       
+  
+  active        Boolean   @default(true)
+  nextRun       DateTime
+  
+  splits        Json?     // Stores [{userId, percentage, amount}]
+  
+  transactions  Transaction[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Goal {
+  id            String    @id @default(cuid())
+  groupId       String
+  group         Group     @relation(fields: [groupId], references: [id])
+  name          String
+  targetAmount  Int
+  currentAmount Int       @default(0)
+  deadline      DateTime?
+  
+  transactions  Transaction[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id])
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  groupId       String
+  group         Group     @relation(fields: [groupId], references: [id])
+  entityType    String    
+  entityId      String
+  action        String    
+  beforeJson    Json?
+  afterJson     Json?
+  changedById   String
+  changedAt     DateTime  @default(now())
+}
