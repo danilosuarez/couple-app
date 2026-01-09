@@ -93,7 +93,7 @@ export default async function DashboardPage() {
             {/* Pending Transactions (Drafts/Pending) */}
             {pendingTransactions.length > 0 && <PendingRecurring transactions={pendingTransactions} />}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Net Worth Card (NEW) */}
                 <div className="bg-gradient-to-br from-emerald-900/50 to-gray-900 p-6 rounded-2xl border border-emerald-500/20 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">

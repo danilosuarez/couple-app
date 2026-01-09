@@ -39,8 +39,8 @@ export default function PendingRecurring({ transactions }: { transactions: Pendi
             <div className="space-y-3">
                 {transactions.map(t => (
                     <div key={t.id} className="bg-gray-900/60 p-4 rounded-xl flex items-center justify-between border border-indigo-500/10 hover:border-indigo-500/30 transition-colors">
-                        <div>
-                            <p className="text-white font-medium">{t.description}</p>
+                        <div className="min-w-0 flex-1 mr-4">
+                            <p className="text-white font-medium truncate">{t.description}</p>
                             <p className="text-xs text-gray-400">
                                 {new Date(t.date).toLocaleDateString()} • {t.category.name}
                             </p>

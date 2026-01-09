@@ -44,8 +44,8 @@ export default function RecurringDueCard({ templates }: { templates: RecurringTe
             <div className="space-y-4">
                 {templates.map(t => (
                     <div key={t.id} className="flex justify-between items-center bg-gray-950/50 p-3 rounded-lg border border-gray-800">
-                        <div>
-                            <p className="text-white font-medium">{t.name}</p>
+                        <div className="min-w-0 flex-1 mr-4">
+                            <p className="text-white font-medium truncate">{t.name}</p>
                             <div className="flex items-center gap-2 text-xs text-gray-400">
                                 <span>{t.category.name}</span>
                                 <span>•</span>

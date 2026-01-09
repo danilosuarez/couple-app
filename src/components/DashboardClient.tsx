@@ -47,11 +47,11 @@ export default function DashboardClient({
 
     return (
         <>
-            <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+            <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden overflow-x-auto">
                 {transactions.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">{labels.transactions.empty}</div>
                 ) : (
-                    <table className="w-full text-left">
+                    <table className="w-full text-left min-w-[600px]">
                         <thead className="bg-gray-950 text-gray-400 text-xs uppercase">
                             <tr>
                                 <th className="px-6 py-3">{labels.transactions.table.date}</th>
