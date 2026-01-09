@@ -53,7 +53,7 @@ export function Sidebar() {
             `}>
                 <div className="p-6 md:pt-8 pt-16 flex justify-center bg-black items-center">
                     <Image
-                        src="/logo.png"
+                        src="/logo2.png"
                         alt="Couple Finance Logo"
                         width={220}
                         height={220}
