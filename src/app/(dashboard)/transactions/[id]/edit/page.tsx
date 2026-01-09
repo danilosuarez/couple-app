@@ -36,6 +36,43 @@ export default async function EditTransactionPage({ params }: { params: Promise<
     }))
     const goals = await getGoals(group.id)
 
+    // Logic to determine initial split state
+    let assignedTo = "ALL";
+    let customPercentages: Record<string, number> = {};
+
+    if (transaction.splits.length > 0) {
+        // Check if equal split
+        const totalAmount = transaction.amount;
+        const memberCount = transaction.splits.length;
+        const equalShare = Math.round(totalAmount / memberCount);
+
+        // Allow a small margin of error for rounding (e.g. +/- 5 pesos)
+        const isRoughlyEqual = transaction.splits.every(s => Math.abs(s.amount - equalShare) < 10);
+
+        if (isRoughlyEqual && memberCount === members.length) {
+            assignedTo = "ALL";
+        } else {
+            // Check if 100% assigned to one person
+            const fullPayer = transaction.splits.find(s => s.amount === totalAmount);
+            if (fullPayer) {
+                assignedTo = fullPayer.userId;
+            } else {
+                // Must be Custom
+                assignedTo = "CUSTOM";
+                transaction.splits.forEach(s => {
+                    // Calculate percentage back from amount (or use stored percentage if available?)
+                    // The schema has percentage Int?, so let's check if it's there
+                    if (s.percentage) {
+                        customPercentages[s.userId] = s.percentage;
+                    } else {
+                        // Infer
+                        customPercentages[s.userId] = parseFloat(((s.amount / totalAmount) * 100).toFixed(1));
+                    }
+                });
+            }
+        }
+    }
+
     const initialValues = {
         amount: transaction.amount,
         description: transaction.description,
@@ -43,12 +80,9 @@ export default async function EditTransactionPage({ params }: { params: Promise<
         date: transaction.date.toISOString().split('T')[0],
         payerId: transaction.payerId,
         type: transaction.type,
-        goalId: transaction.goalId || undefined
-        // Splits handling is implicit in form via amount changes usually, but we haven't mapped splits back perfectly 
-        // to `initialValues` in the form yet. 
-        // `TransactionForm` applies initialValues to state on mount. 
-        // It calls `updateSplits(initialValues.amount)` which resets splits to even. 
-        // For MVP, resetting splits on edit is acceptable or we'd need deeper changes.
+        goalId: transaction.goalId || undefined,
+        assignedTo,
+        customPercentages
     }
 
     // Bind ID to action
