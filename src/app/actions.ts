@@ -151,7 +151,7 @@ export async function createTransaction(prevState: any, formData: FormData) {
             entityType: 'Transaction',
             entityId: transaction.id,
             action: 'CREATE',
-            after: transaction,
+            after: transaction as any,
             userId: user.id
         })
 
@@ -241,7 +241,7 @@ export async function updateTransaction(transactionId: string, prevState: any, f
             entityType: 'Transaction',
             entityId: transactionId,
             action: 'UPDATE',
-            after: updated,
+            after: updated as any,
             userId: user.id
         });
 
@@ -284,7 +284,7 @@ export async function createGoal(formData: FormData) {
         entityType: 'Goal',
         entityId: goal.id,
         action: 'CREATE',
-        after: goal,
+        after: goal as any,
         userId: user.id
     })
 
@@ -324,7 +324,7 @@ export async function updateGoal(goalId: string, formData: FormData) {
         entityType: 'Goal',
         entityId: goalId,
         action: 'UPDATE',
-        after: updated,
+        after: updated as any,
         userId: user.id
     })
 
@@ -356,7 +356,7 @@ export async function deleteGoal(goalId: string) {
         entityType: 'Goal',
         entityId: goalId,
         action: 'DELETE',
-        after: existingGoal,
+        after: existingGoal as any,
         userId: user.id
     })
 
@@ -432,7 +432,7 @@ export async function createRecurringTemplate(prevState: any, formData: FormData
             entityType: 'RecurringTemplate',
             entityId: template.id,
             action: 'CREATE',
-            after: template,
+            after: template as any,
             userId: user.id
         })
 
@@ -545,7 +545,7 @@ export async function deleteTransaction(transactionId: string) {
             entityType: 'Transaction',
             entityId: transactionId,
             action: 'DELETE',
-            after: transaction, // Storing deleted data for record
+            after: transaction as any, // Storing deleted data for record
             userId: user.id
         });
 
