@@ -78,7 +78,8 @@ export async function POST(req: NextRequest) {
 
                         // Phone Number Mapping
                         const PHONE_MAP: Record<string, string> = {
-                            "573138412398": "Paola"
+                            "573138412398": "Paola",
+                            "573116621953": "Danilo"
                         };
 
                         if (PHONE_MAP[from]) {
