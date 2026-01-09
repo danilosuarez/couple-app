@@ -51,13 +51,13 @@ export function Sidebar() {
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:relative md:translate-x-0
             `}>
-                <div className="p-6 md:pt-6 pt-16 flex justify-center">
+                <div className="p-6 md:pt-8 pt-16 flex justify-center bg-black items-center">
                     <Image
                         src="/logo.png"
                         alt="Couple Finance Logo"
-                        width={180}
-                        height={60}
-                        className="object-contain h-12 w-auto"
+                        width={220}
+                        height={220}
+                        className="object-contain w-full h-auto max-h-48"
                         priority
                     />
                 </div>
