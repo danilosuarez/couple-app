@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, CreditCard, PiggyBank, Target, Settings, LogOut, FileText, CalendarClock, Wallet, Menu, X } from "lucide-react"
+import { Home, CreditCard, Target, Settings, LogOut, FileText, CalendarClock, Wallet, Menu, X } from "lucide-react"
 import { signOut } from "next-auth/react"
+import Image from "next/image"
 
 const navItems = [
     { name: "Inicio", href: "/dashboard", icon: Home },
@@ -50,8 +51,15 @@ export function Sidebar() {
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:relative md:translate-x-0
             `}>
-                <div className="p-6 md:pt-6 pt-16">
-                    <h2 className="text-xl font-bold text-emerald-400">Couple Finance</h2>
+                <div className="p-6 md:pt-6 pt-16 flex justify-center">
+                    <Image
+                        src="/logo.png"
+                        alt="Couple Finance Logo"
+                        width={180}
+                        height={60}
+                        className="object-contain h-12 w-auto"
+                        priority
+                    />
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
