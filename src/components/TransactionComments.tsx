@@ -68,7 +68,7 @@ export function TransactionComments({
     }
 
     return (
-        <div className="flex flex-col h-[400px] border-t border-gray-800">
+        <div className="flex flex-col h-full border-t md:border-t-0 border-gray-800">
             <div className="p-4 bg-gray-950 border-b border-gray-800">
                 <h3 className="text-sm font-semibold text-gray-300">{labels.transactions.comments}</h3>
             </div>
