@@ -73,10 +73,24 @@ export async function POST(req: NextRequest) {
                         const category = group.categories.find(c => c.name.toLowerCase() === parsed.categoryName?.toLowerCase())
                             || group.categories[0];
 
-                        // 5. Resolve Payer (Default to "Invitado" if valid, otherwise AI or first member)
+                        // 5. Resolve Payer (Default to "Invitado", then check Phone Map, then AI)
                         let payerId = invitadoMember.id;
 
-                        // If AI explicitly detected a different name, try to use that
+                        // Phone Number Mapping
+                        const PHONE_MAP: Record<string, string> = {
+                            "573138412398": "Paola"
+                        };
+
+                        if (PHONE_MAP[from]) {
+                            const mappedName = PHONE_MAP[from];
+                            const found = memberMap.find(m => m.name.toLowerCase().includes(mappedName.toLowerCase()));
+                            if (found) {
+                                payerId = found.id;
+                                console.log(`Phone number ${from} mapped to user ${found.name}`);
+                            }
+                        }
+
+                        // If AI explicitly detected a different name, try to use that (Overrides phone map)
                         if (parsed.payerName) {
                             const found = memberMap.find(m => m.name.toLowerCase().includes(parsed.payerName!.toLowerCase()));
                             if (found) payerId = found.id;
