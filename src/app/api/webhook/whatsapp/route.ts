@@ -73,28 +73,43 @@ export async function POST(req: NextRequest) {
                         const category = group.categories.find(c => c.name.toLowerCase() === parsed.categoryName?.toLowerCase())
                             || group.categories[0];
 
-                        // 5. Resolve Payer (Default to "Invitado", then check Phone Map, then AI)
+                        // 5. Resolve Payer
+                        // Priority 1: Invitado (Default)
                         let payerId = invitadoMember.id;
 
-                        // Phone Number Mapping
+                        // Priority 2: Phone Number Mapping
                         const PHONE_MAP: Record<string, string> = {
                             "573138412398": "Paola",
                             "573116621953": "Danilo"
                         };
 
-                        if (PHONE_MAP[from]) {
-                            const mappedName = PHONE_MAP[from];
-                            const found = memberMap.find(m => m.name.toLowerCase().includes(mappedName.toLowerCase()));
-                            if (found) {
-                                payerId = found.id;
-                                console.log(`Phone number ${from} mapped to user ${found.name}`);
+                        // Clean the number (remove + if present, though typically it's just digits)
+                        const cleanFrom = from.replace(/\D/g, '');
+                        console.log(`Processing message from RAW: ${from}, CLEAN: ${cleanFrom}`);
+
+                        let phoneMappedUser = null;
+                        if (PHONE_MAP[cleanFrom]) {
+                            const mappedName = PHONE_MAP[cleanFrom];
+                            // Search loosely
+                            phoneMappedUser = memberMap.find(m => m.name.toLowerCase().includes(mappedName.toLowerCase()));
+                            if (phoneMappedUser) {
+                                payerId = phoneMappedUser.id;
+                                console.log(`MATCH: Phone ${cleanFrom} mapped to user ${phoneMappedUser.name} (ID: ${phoneMappedUser.id})`);
+                            } else {
+                                console.log(`WARNING: Mapped name '${mappedName}' not found in group members:`, memberNames);
                             }
+                        } else {
+                            console.log(`NO MATCH in PHONE_MAP for ${cleanFrom}`);
                         }
 
-                        // If AI explicitly detected a different name, try to use that (Overrides phone map)
+                        // Priority 3: AI explicit detection (Overrides Phone Map)
+                        // ONLY if AI is very specific. 
                         if (parsed.payerName) {
-                            const found = memberMap.find(m => m.name.toLowerCase().includes(parsed.payerName!.toLowerCase()));
-                            if (found) payerId = found.id;
+                            const aiFound = memberMap.find(m => m.name.toLowerCase().includes(parsed.payerName!.toLowerCase()));
+                            if (aiFound) {
+                                console.log(`AI OVERRIDE: AI detected payer '${parsed.payerName}', overriding ${phoneMappedUser?.name || 'Default'}`);
+                                payerId = aiFound.id;
+                            }
                         }
 
                         if (parsed.amount && parsed.amount > 0) {
